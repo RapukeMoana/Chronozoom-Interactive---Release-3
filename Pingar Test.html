@@ -1,0 +1,77 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+    <title></title>
+
+    <meta http-equiv="Access-Control-Allow-Origin" content="http://api3.pingar.com/" />
+
+
+
+    <script src="js/jquery-1.10.2.min.js" type="text/javascript"></script>
+
+    <script src="js/json2.js" type="text/javascript"></script>
+
+
+
+    <script type="text/javascript">
+
+        // Initialize the object, before adding data to it.
+
+        var PingarAPIRequest = new Object();
+
+        PingarAPIRequest.AppID = "9a8e2764";
+
+        PingarAPIRequest.AppKey = "908630a5a46eac5d6f67d87d7370dbad";
+
+        PingarAPIRequest.Language = "en";
+
+        PingarAPIRequest.EntityExtraction = new Object();
+
+        PingarAPIRequest.EntityExtraction.Documents = new Array();
+
+        PingarAPIRequest.EntityExtraction.Documents[0]="Yvo de Boer said he left his job as the U.N.'s top climate official in frustration 18 months ago, believing the process of negotiating a meaningful climate agreement is failing.";
+
+        PingarAPIRequest.EntityExtraction.DocumentsFormat = "Text";
+
+
+        $.ajax({
+
+            type: "POST",
+
+            contentType: "application/json; charset=utf-8",
+
+            url: "http://api3.pingar.com/json.svc/GetEntities",
+
+            data: JSON.stringify(PingarAPIRequest),
+
+            processData : false,
+
+            success: function (responseData) {
+
+                for(entityIndex in responseData.EntityExtraction.EntitiesResult[0])
+
+                {
+
+                    var entity = responseData.EntityExtraction.EntitiesResult[0][entityIndex];
+
+                    $("#responseData").append(entity.Type  + " : " + entity.Title + "<br/>");
+
+                }
+
+            }
+
+
+        });
+
+    </script>
+
+</head>
+
+<body>
+
+<div id="responseData"></div>
+
+</body>
+
+</html>

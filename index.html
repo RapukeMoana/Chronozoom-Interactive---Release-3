@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>ChronoZoom 3D Interactive - General</title>
+    <meta http-equiv="Access-Control-Allow-Origin" content="http://api3.pingar.com/" />
+
+
+    <link rel="stylesheet" type="text/css" href="css/result-light.css">
+    <title>Example 04.09 - Linematerial</title>
+    <script type="text/javascript" src="js/three.js"></script>
+
+    <script type="text/javascript" src="js/stats.js"></script>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            /*overflow: hidden;*/
+        }
+    </style>
+  
+  <style type='text/css'>
+    #myworld {
+    font-family: Verdana;
+}
+.supercollection {
+    border: 1px solid lightgrey;    
+}
+.current-collection {
+    font-size: large;
+    font-weight: bold;
+}
+.fiddle-title {
+    font-size: x-large;
+}
+#supercollection-list {
+    height: 150px;
+    overflow: auto;
+    background-color: #99FFFF;
+    margin-left: 3px;
+    margin-bottom: 5px;
+    padding: 2px;
+    font-size: small;
+}
+.timeline {
+    border: 1px solid black;
+    margin-left: 3px;
+    background-color: #FFFFCC;
+    padding: 2px;
+}
+.timeline-type {
+    margin-top: 5px;
+    background-color: red;
+    font-weight: bold;
+    color: white;
+}
+.timeline-title {
+    font-size: x-large;
+}
+.timeline-collapsed .tl-collapsed-detail {
+    display: block;
+    clear: both;
+}
+.timeline-collapsed .tl-expanded-detail {
+    display: none;
+}
+.timeline-expanded .tl-collapsed-detail {
+    display: none;
+}
+.timeline-expanded .tl-expanded-detail {
+    display: block;
+}
+.exhibit {
+    border: 1px solid black;
+    margin-left: 3px;
+    background-color: AliceBlue;
+    padding: 2px;
+    overflow: hidden;
+}
+.exhibit-type {
+    margin-top: 5px;
+    background-color: blue;
+    font-weight: bold;
+    color: white;
+}
+.exhibit-title {
+    font-size: large;
+}
+.artifact {
+    clear: both;
+    padding: 2px;
+}
+.artifact-type {
+    background-color: green;
+    font-weight: bold;
+    color: white;
+}
+.artifact-description-collapsed .ad-collapsed {
+    display: block;
+    clear: both;
+}
+.artifact-description-collapsed .ad-expanded {
+    display: none;
+}
+.artifact-description-expanded .ad-collapsed {
+    display: none;
+}
+.artifact-description-expanded .ad-expanded {
+    display: block;
+}
+.ad-text {
+    background-color: #F8F8F8;
+}
+.artifact-img-frame {
+    margin: 4px;
+    float: left;    
+}
+.artifact-img {
+    width: 75px;
+    height: 75px;
+}
+
+  </style>
+  
+</head>
+<body>
+<div id="ThreeJS"></div>
+
+<!--  <div id="myworld" >
+    <span class="fiddle-title">ChronoZoom Progressive Display</span><br/>
+    <span class="fiddle-instructions">Click on a collection below to display its contens in a flattened tree structure below.<br/>
+        Some of the artifact media will not show because they are not simple images (e.g. videos or PDF documents which require special viewers).<br/>
+        Some of the collections have illegal data and will throw an Ajax error.
+    </span><br/>
+    <span class="current-collection">All Collections: </span>
+    <div id="supercollection-list">
+    </div>
+    <span class="current-collection">Current Collection: </span><span id="current-collection" class="current-collection"></span>
+    <div id="currentcollection-list">
+    </div>
+</div>-->
+<div id="templates" style="display:none;">
+    <div id="supercollection-template" class="supercollection">
+        <span class="supercollection-name"></span>/<span class="collection-name"></span>
+    </div>
+    <div id="timeline-template" class="timeline">
+        <div class="timeline-header">
+            <span class="timeline-type">T</span>
+            <span class="timeline-title">Some Title</span>
+            <span class="timeline-from-time">12345</span> to 
+            <span class="timeline-to-time">67890</span>
+            <span class="flush-children"><a href="#" onclick="removeChildren(this); return false;">(X)</a></span>
+        </div>
+        <div class="timeline-collapsed-x">
+            <span class="get-children"><a href="#" onclick="getChildren(this); return false;">(Get Children)</a></span>
+            <div class="child-timeline-list">
+            </div>
+            <div class="child-exhibit-list">
+            </div>
+        </div>
+    </div>
+    <div id="exhibit-template" class="exhibit">
+        <div class="exhibit-header">
+            <span class="exhibit-type">E</span>
+            <span class="exhibit-title">Some Title</span>
+            <span class="exhibit-time">12345</span>
+        </div>
+        <div class="exhibit-collapsed-x">
+            <div class="child-artifact-list">
+            </div>
+        </div>
+    </div>
+            <!-- Artifact Template -->
+    <div id="artifact-template" class="artifact">
+        <span class="artifact-type">A</span>
+        <span class="artifact-title">Thingy</span>
+        <div class="artifact-description-collapsed">
+            <span class="ad-collapsed"><a href="#" onclick="flipDescription(this); return false;">+(Expand Description)</a></span>
+            <span class="ad-expanded"><a href="#" onclick="flipDescription(this); return false;">-(Collapse) </a></span>
+            <div class="ad-expanded">
+                <div class="artifact-img-frame">
+                    <img src="http://www.hdwallpapersinn.com/wp-content/uploads/2012/06/Dogs-AreBuddies-Animals-Are-Friends11.jpg" class="artifact-img"/>          
+                </div>
+                <div class="ad-expanded ad-text">TBD</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <script src="js/json2.js" type="text/javascript"></script>
+  <script src="js/jquery-1.10.2.min.js"></script>
+  <script src="js/Three.js"></script>
+  <script src="js/Detector.js"></script>
+  <script src="js/Stats.js"></script>
+  <script src="js/OrbitControls.js"></script>
+  <script src="js/TrackballControls.js"></script>
+  <script src="js/FlyControls.js"></script>
+  <script src="js/THREEx.KeyboardState.js"></script>
+  <script src="js/THREEx.FullScreen.js"></script>
+  <script src="js/THREEx.WindowResize.js"></script>
+  <script src="stemkoskiLib/Labeled-Geometry.js"></script>
+  <script src="stemkoskiLib/Mouse-Click.js"></script>
+  <script src="fonts/optimer_bold.typeface.js"></script>
+  <script src="fonts/optimer_regular.typeface.js"></script>
+  <script src="RapukeLib/planeText.js"></script>
+  <script src="RapukeLib/imageToTexture.js"></script>
+
+  <!--<div id="ThreeJS"></div> //style="z-index: 1; position: absolute; left:0px; top:0px"></div>-->
+  <script>
+      /*
+       Chronozoom 3D Visualization"
+       Author: David C White
+       Date: January 2014
+       */
+
+      // MAIN
+
+      // standard global variables
+      var container, scene, camera, renderer, controls, stats, gyro;
+      var keyboard = new THREEx.KeyboardState();
+      var clock = new THREE.Clock();
+      var TimeLineCount = 0, TimeLineY = 0;
+      // custom global variables
+      var mesh;
+      var targetList = [];
+      var projector, mouse = { x: 0, y: 0 };
+      var groupEvent, group;
+      var EventCount=0;
+      var ContentItemCount=0, GigaCount=0, MegaCount=0, ThouCount=0, BCECount=0, CECount= 0, RecentCount= 0,Count1850=0;
+      var CurrentTimelineX=0, CurrentTimeLineXEnd= 0, CurrentTimeLineXEndScaled = 0, CurrentTimelineY=0, CurrentTimelineZ= 0, CurrentTimelineColor;
+      var scaleFactor=0, zOffset= 0, zStart = -1000;
+      var yStep = 20, scaleSpace = 400;
+      var eventPosition=0,eventX=0, eventY=0, eventY=0;
+      var superCollectionGlobal, subCollectionGlobal;
+      var rootTimelineId;
+      var radius = 6371;
+      var tilt = 0.41;
+      var rotationSpeed = 0.02;
+      var switch2Dor3D = "3D";
+      var timelineRaw;
+      var lengthScale=0;
+      var relationshipStep = 5;
+      var materialPaintingGlobal;
+      var texturePainting;
+      var PingarData = "";
+      var artifactCountGlobal;
+      var artifactX = 0, artifactY = 0,artifactZ = 0, artifactHeight=0;
+//      var callbackPainting = function(x,y,z) {
+      var callbackPainting = function() {
+          var image = texturePainting.image;
+//              scene.add( meshCanvas );
+          var geometry = new THREE.PlaneGeometry( 100, 100 );
+          materialPaintingGlobal.side = THREE.DoubleSide;
+          var mesh = new THREE.Mesh( geometry, materialPaintingGlobal );
+//          addPainting( scene, mesh, x, y, z );
+          addPainting( scene, mesh, artifactX, artifactY - artifactHeight/2, artifactZ );
+          function addPainting( zscene, zmesh, x, y, z ) {
+              var scaler = 300;
+//              zmesh.scale.x = image.width / scaler;
+//              zmesh.scale.y = image.height / scaler;
+              zmesh.width = 100;
+              zmesh.height = 100;
+              zmesh.position.x = x;
+              zmesh.position.y = y+0;
+              zmesh.position.z = z-180;
+              zmesh.name = "deleteable";
+              zmesh.quaternion = camera.quaternion;
+              zscene.add( zmesh );
+              targetList.push(zmesh);
+              var meshFrame = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( {doubleSided: true, color: 0x000000, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 5 } )  );
+              meshFrame.scale.x = 1.01 * image.width / scaler;
+              meshFrame.scale.y = 1.01 * image.height / scaler;
+              meshFrame.position.x = x;
+              meshFrame.position.y = y;
+              meshFrame.position.z = z;
+/*              zscene.add( meshFrame );
+              meshFrame.name = "deleteable";
+              targetList.push(meshFrame);*/
+
+/*              var meshShadow = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.75, transparent: true } )  );
+              meshShadow.position.y = - 1.1 * image.height/2;
+              meshShadow.position.z = - 1.1 * image.height/2;
+              meshShadow.rotation.x = - Math.PI / 2;
+              meshShadow.scale.x = 1.1 * image.width / scaler;
+              meshShadow.scale.y = 1.1 * image.height / scaler;
+              zscene.add( meshShadow );*/
+
+
+          }
+      };
+
+
+      init();
+      animate();
+
+      // FUNCTIONS
+      function init()
+      {
+//          document.ElementById("myworld").style.visibility = "hidden";
+//          document.ElementById("templates").style.visibility = "hidden";
+          //
+//          getTermsFromPingar("ddddd");
+          // SCENE
+          scene = new THREE.Scene();
+          // CAMERA
+          var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+          var VIEW_ANGLE = 60, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+          camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+//          camera = new THREE.OrthographicCamera( -500, 1000, 500, 500, 50, 1e7 );
+//          camera.position.z = radius * 5;
+          scene.add(camera);
+//          camera.position.set(-1722,220,-528);
+//          camera.position.set(-1226,26,-1211);
+          camera.position.set(-1458,43,-1382);
+//          camera.lookAt(scene.position);
+//          camera.lookAt(-500,500,0);
+
+          // Gyro
+
+          gyro = new THREE.Gyroscope();
+          gyro.position.set(1,1,1);
+            gyro.scale.set(1,1,1);
+          scene.add(gyro);
+          gyro.add(camera);
+
+          // RENDERER
+          if ( Detector.webgl )
+              renderer = new THREE.WebGLRenderer( {antialias:true} );
+          else
+              renderer = new THREE.CanvasRenderer();
+          renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+          var projector = new THREE.Projector();
+          document.addEventListener('mousedown', onDocumentMouseDown, false);
+          container = document.getElementById( 'ThreeJS' );
+          container.appendChild( renderer.domElement );
+          // EVENTS
+          THREEx.WindowResize(renderer, camera);
+          THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+          // CONTROLS
+//          controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+/*         controls = new THREE.FlyControls( camera );
+           controls.movementSpeed = 10;
+          controls.domElement = container;
+          controls.rollSpeed = Math.PI / 24;
+          controls.autoForward = false;
+          controls.dragToLook = false;*/
+
+            controls = new THREE.TrackballControls( camera );
+            controls.rotateSpeed = 1.0;
+            controls.zoomSpeed = 1.2;
+            controls.panSpeed = 0.8;
+            controls.noZoom = false;
+            controls.noPan = false;
+            controls.staticMoving = true;
+            controls.dynamicDampingFactor = 0.3;
+            controls.keys = [ 65, 83, 68 ];
+            controls.addEventListener( 'change', render );
+
+          // Panel
+          var info = document.createElement('div');
+          info.style.position = 'absolute';
+          info.style.top = '10px';
+          info.style.width = '100%';
+          info.style.textAlign = 'center';
+          info.innerHTML = 'Chronozoom 3D with Vertical Hierarchy of Timelines on Multiple Time Scale Sets </br>Rotate - left/one finger, Zoom - wheel/middle/two fingers, Pan - right/three fingers';
+
+//          info.innerHTML += dropdown;
+/*
+          info.innerHTML += '<br/>View: <select id="view" onchange="setView()"><option selected>Start</option><option>Top</option><option>Bottom</option><option>Left</option><option>Right</option><option>Back</option><option>Front</option></select> ' +
+                  'CameraX:<input id="cameraX" type="text"  size = "4"/> CameraY:<input id="cameraY" type="text"  size = "4"/> CameraZ:<input id="cameraZ" type="text"  size = "4"/> Axes: <input id="axes" type="checkbox"  checked="checked" onchange=""/>';
+*/
+
+/*          info.innerHTML += '<br/>View: <select id="view" onchange="setView()"><option selected>Start</option><option>Top</option><option>Bottom</option><option>Left</option><option>Right</option><option>Back</option><option>Front</option></select> ' +
+                  ' Axes: <input id="axes" type="checkbox"   onchange=""/>';*/
+//          info.innerHTML += '<br/>Extrusion Segments: <select onchange="addTube()" id="segments"><option>50</option><option selected>100</option><option>200</option><option>400</option></select>';
+//          info.innerHTML += '<br/>Radius Segments: <select id="radiusSegments" onchange="addTube()"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>8</option><option>12</option></select>';
+//          info.innerHTML += '<br/>Timelines:<input id="timelineCount" type="text" size = "4" /> Events: <input id="events" type="checkbox"  checked="checked" onchange=""/> <input id="eventCount" type="text"  size = "4"/> Artifacts: <input id="artifacts" type="checkbox" checked="checked" onchange=""/> <input id="artifactCount" type="text"  size = "4"/> Surface Events: <input id="dimension" type="checkbox" onchange="draw2D()"/> ';
+          info.innerHTML += '<br/>Timelines:<input id="timelineCount" type="text" size = "4" /> Events: <input id="events" type="checkbox"  checked="checked" onchange=""/> <input id="eventCount" type="text"  size = "4"/> Artifacts: <input id="artifacts" type="checkbox" checked="checked"   onchange=""/> <input id="artifactCount" type="text"  size = "4"/>';
+//          info.innerHTML += '<br/> Giga: <input id="giga" checked="checked" type="checkbox" onchange=""  /> Mega: <input id="mega" checked="checked" type="checkbox" onchange=""  /> Kilo: <input id="kilo" checked="checked" type="checkbox" onchange=""  /> BCE: <input id="bce" checked="checked" type="checkbox" onchange=""  /> CE: <input id="ce" checked="checked" type="checkbox" onchange=""/> <=1850: <input id="recent" checked="checked" type="checkbox" onchange=""  /> > 1850: <input id="veryRecent" checked="checked" type="checkbox" onchange=""  />';
+
+          info.innerHTML += '<br/> Giga: <input id="giga" checked="checked" type="checkbox" onchange=""  /> Mega: <input id="mega"  type="checkbox" onchange=""  /> Kilo: <input id="kilo"  type="checkbox"  onchange=""  /> BCE: <input id="bce"  type="checkbox" onchange=""  /> CE: <input id="ce"  type="checkbox" onchange=""/> <=1850: <input id="recent"  type="checkbox" onchange=""  /> > 1850: <input id="veryRecent"  type="checkbox" onchange=""  />';
+//          info.innerHTML += '<br/> First World War: <input id="ww1"   checked="checked"    type="checkbox" onchange=""  />';
+          info.innerHTML += '<br/> First World War: <input id="ww1"   type="checkbox" onchange=""  />';
+
+//          info.innerHTML += '<br/> First World War: <input id="ww1"  type="checkbox" onchange=""  /> ';
+//          info.innerHTML += '<br/>  Timeline Index:<input id="timelineindex" type="text"  background-color:#800080 size = "4"/> Objects:<input id="objectCount" type="text"  size = "4"/>';
+//          info.innerHTML += '<br/><br/><input id="clearScene" type="button" onclick="clearScene()" value="Redraw (if it hangs refresh!)"/><br/> ';
+          info.innerHTML += '<br/>Select filters then Refresh (dots are placeholders for Artifact Images)';
+//          info.innerHTML += '<br/><br/><input id="animation" type="button" onclick="animateCamera(true)" value="Camera Spline Animation View: OFF"/><br/> Look Ahead <input id="lookAhead" type="checkbox" onchange="animateCamera()" /> Camera Helper <input id="cameraHelper" type="checkbox" onchange="animateCamera()" />';
+          info.innerHTML += '<br/><input id="reDrawId" type="button" onclick="  startup()" value="re Draw"/> <input id="clearSceneId" type="button" onclick="clearObjectsFromScene()" value="Clear Scene"/> ';
+          container.appendChild(info);
+
+          // STATS
+          stats = new Stats();
+          stats.domElement.style.position = 'absolute';
+          stats.domElement.style.bottom = '0px';
+          stats.domElement.style.zIndex = 100;
+          container.appendChild( stats.domElement );
+          // LIGHT
+          var light = new THREE.PointLight(0xffffff);
+          light.position.set(100,250,100);
+          scene.add(light);
+ // Text
+//          drawText1("Giga", 100, 100, 0);
+//          drawText("          Chronozoom 3D          ", 0, 500, 0);
+
+           // FLOOR
+          var img = new Image();
+/*          $.get(
+                  'http://www.corsproxy.com/lh4.googleusercontent.com/-KW-igfekK1A/' +
+                          'T4SRm1Tw7CI/AAAAAAAAACo/GIBNY3G301M/s144/tonypb.jpg',
+                  function(response) {img = response; });*/
+//          var image1 ='http://www.corsproxy.com/lh4.googleusercontent.com/-KW-igfekK1A/' +
+//                  'T4SRm1Tw7CI/AAAAAAAAACo/GIBNY3G301M/s144/tonypb.jpg';
+//                    var image1 ='https://lh4.googleusercontent.com/-KW-igfekK1A/' +
+//           'T4SRm1Tw7CI/AAAAAAAAACo/GIBNY3G301M/s144/tonypb.jpg';
+//          var image1 ='assets/images/RPM.png';
+//          var image1 ='assets/images/checkerboard.jpg';
+//          var image1 ='assets/images/Timeline 2.png';
+//          var image1 ='Aoraki-Mount_Cook_from_Hooker_Valley.jpg';
+//          var image1 ='http://upload.wikimedia.org/wikipedia/commons/2/29/Aoraki-Mount_Cook_from_Hooker_Valley.jpg';
+//          var image1 = 'http://commons.wikimedia.org/wiki/File:NGC_6791HST2008.jpg';
+//          var image1 = 'http://www.corsproxy.com/upload.wikimedia.org/wikipedia/commons/0/08/NGC_6791HST2008.jpg';
+//                    var image1 = 'http://en.wikipedia.org/wiki/File:Milky_Way_Arch.jpg';
+          var image1 = 'https://lh4.googleusercontent.com/-Bp_ZAYDvB0s/Usxk6x34WyI/AAAAAAAAABY/3Q8fzALN2a4/s800/Screenshot%2520%25282%2529.jpg';
+
+//          var img = new Image();
+          img.crossOrigin = ''; // synonymous with, er, 'anonymous'
+          img.src = image1;
+//          img.width = 1371;
+//          img.height = 771;
+          if (!isPowerOfTwo(img.width) || !isPowerOfTwo(img.height)) {
+              // Scale up the texture to the next highest power of two dimensions.
+              var canvas1 = document.createElement("canvas");
+              canvas1.width = nextHighestPowerOfTwo(img.width);
+              canvas1.height = nextHighestPowerOfTwo(img.height);
+
+              var ctx1 = canvas1.getContext("2d");
+              ctx1.drawImage(img, 0, 0, canvas1.width, canvas1.height);
+//              ctx1.drawImage(img, 0, 0, img.width, img.height);
+              img = canvas1;
+          }
+//          var floorTexture = THREE.ImageUtils.loadTexture(image1);
+
+          var floorTexture = new THREE.Texture(img);
+
+          floorTexture.needsUpdate = true;
+           var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture,  side: THREE.DoubleSide } );
+           var floorGeometry = new THREE.PlaneGeometry(img.width, img.height );
+
+           var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+           floor.position.y = 500;
+//           floor.rotation.y = Math.PI / 2;
+           scene.add(floor);
+/*//          scene.remove(floor);
+          var img1 = new Image();
+          img1.src = 'assets/images/M.png';
+          var floorTexture1 = new THREE.Texture(img1);
+          floorTexture1.needsUpdate = true;
+          var floorMaterial1 = new THREE.MeshBasicMaterial( { map: floorTexture1, useScreenCoordinates: true, side: THREE.DoubleSide } );
+          var floorGeometry1 = new THREE.PlaneGeometry(250,200,  10, 10);
+          var floor1 = new THREE.Mesh(floorGeometry1, floorMaterial1);
+          floor1.position.y = 680;
+          floor1.position.z = -100;
+//          floor1.rotation.y = Math.PI / 2;
+          floor1.rotation.x = Math.PI / 2;
+          scene.add(floor1);*/
+
+
+
+//          };
+// Get Picture
+/*          var callbackPainting = function() {
+              var image = texturePainting.image;
+//              scene.add( meshCanvas );
+              var geometry = new THREE.PlaneGeometry( 100, 100 );
+              var mesh = new THREE.Mesh( geometry, materialPaintingGlobal );
+              addPainting( scene, mesh, 100, 200, 100 );
+
+              function addPainting( zscene, zmesh, x, y, z ) {
+                  var scaler = 100;
+                  zmesh.scale.x = image.width / scaler;
+                  zmesh.scale.y = image.height / scaler;
+                  zmesh.position.x = x;
+                  zmesh.position.y = y;
+                  zmesh.position.z = z;
+                  zscene.add( zmesh );
+
+                  var meshFrame = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color: 0x000000, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 5 } )  );
+                  meshFrame.scale.x = 1.01 * image.width / scaler;
+                  meshFrame.scale.y = 1.01 * image.height / scaler;
+                  meshFrame.position.x = x;
+                  meshFrame.position.y = y;
+                  meshFrame.position.z = z;
+                  zscene.add( meshFrame );
+
+                  var meshShadow = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.75, transparent: true } )  );
+                  meshShadow.position.y = - 1.1 * image.height/2;
+                  meshShadow.position.z = - 1.1 * image.height/2;
+                  meshShadow.rotation.x = - Math.PI / 2;
+                  meshShadow.scale.x = 1.1 * image.width / scaler;
+                  meshShadow.scale.y = 1.1 * image.height / scaler;
+                  zscene.add( meshShadow );
+
+
+              }
+          };*/
+                    var image1 = 'http://www.corsproxy.com/upload.wikimedia.org/wikipedia/commons/0/08/NGC_6791HST2008.jpg';  //Nope
+//                    var image1 = 'http://www.corsproxy.com/en.wikipedia.org/wiki/File:Milky_Way_Arch.jpg';
+//          var image1 = 'https://lh4.googleusercontent.com/-Bp_ZAYDvB0s/Usxk6x34WyI/AAAAAAAAABY/3Q8fzALN2a4/s800/Screenshot%2520%25282%2529.jpg';  //Works
+//          texturePainting = THREE.ImageUtils.loadTexture( image1, THREE.UVMapping, callbackPainting(100, 200, 100 ) );
+/*          texturePainting = THREE.ImageUtils.loadTexture( image1, THREE.UVMapping, callbackPainting );
+          materialPaintingGlobal = new THREE.MeshBasicMaterial( { color: 0xffffff, map: texturePainting } );*/
+
+          // SKYBOX
+          var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
+/*          var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
+          var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+          scene.add(skyBox);*/
+
+          ////////////
+          // CUSTOM //
+          ////////////
+
+/*          var geometry = new THREE.SphereGeometry( 30, 32, 16 );
+          var material = new THREE.MeshLambertMaterial( { color: 0x000088 } );
+          mesh = new THREE.Mesh( geometry, material );
+          mesh.position.set(40,40,40);
+          scene.add(mesh);*/
+
+
+/*          var gridXZ = new THREE.GridHelper(100, 10);
+          gridXZ.setColors( new THREE.Color(0x006600), new THREE.Color(0x006600) );
+          gridXZ.position.set( 100,0,100 );
+          scene.add(gridXZ);
+
+          var gridXY = new THREE.GridHelper(100, 10);
+          gridXY.position.set( 100,100,0 );
+          gridXY.rotation.x = Math.PI/2;
+          gridXY.setColors( new THREE.Color(0x000066), new THREE.Color(0x000066) );
+          scene.add(gridXY);
+
+          var gridYZ = new THREE.GridHelper(100, 10);
+          gridYZ.position.set( 0,100,100 );
+          gridYZ.rotation.z = Math.PI/2;
+          gridYZ.setColors( new THREE.Color(0x660000), new THREE.Color(0x660000) );
+          scene.add(gridYZ);*/
+
+          // direction (normalized), origin, length, color(hex)
+/*          var origin = new THREE.Vector3(0,100,50);
+          var terminus  = new THREE.Vector3(75,75,75);
+          var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
+          var arrow = new THREE.ArrowHelper(direction, origin, 50, 0x884400);
+          scene.add(arrow);*/
+
+          SetupOnMouseClick();
+
+//          GroupTest();
+
+/*          // //// Group test
+          var geometry1 = new THREE.CubeGeometry( 10, 10, 10 );
+          var material1 = new THREE.MeshNormalMaterial();
+
+          group = new THREE.Object3D();
+
+          for ( var i = 0; i < 1000; i ++ ) {
+
+              var mesh = new THREE.Mesh( geometry1, material1 );
+              mesh.position.x = Math.random() * 200 - 100;
+              mesh.position.y = Math.random() * 200 - 100;
+              mesh.position.z = Math.random() * 200 - 100;
+
+              mesh.rotation.x = Math.random() * 2 * Math.PI;
+              mesh.rotation.y = Math.random() * 2 * Math.PI;
+
+              mesh.matrixAutoUpdate = false;
+              mesh.updateMatrix();
+
+              group.add( mesh );
+
+          }
+
+          scene.add( group );
+          // //////////////////*/
+
+      }
+
+
+      function animate()
+      {
+          requestAnimationFrame( animate );
+          render();
+          update();
+          controls.update();
+      }
+
+      function update()
+      {
+          if ( keyboard.pressed("z") )
+          {	// do something
+          }
+/*          document.getElementById('cameraX').value = camera.position.x;
+          document.getElementById('cameraY').value = camera.position.y;
+          document.getElementById('cameraZ').value = camera.position.z;*/
+          controls.update();
+          stats.update();
+      }
+
+      function render()
+      {
+          renderer.render( scene, camera );
+      }
+
+  </script>
+
+
+  <script type='text/javascript'>//<![CDATA[
+
+/* These globals are used instead of hidden fields or data- statements */
+var globalSuperCollections=null;
+var globalCollection=null;
+
+function Xxx(){
+
+}
+
+  function truncate(_value)
+{
+  if (_value<0) return Math.ceil(_value);
+  else return Math.floor(_value);
+}
+function isLeap(year){
+    if( year<1582) return false;
+    if( 0==year%400) return true;
+    else if( 0==year%100) return false;
+    else if( 0==year%4) return true;
+    else return false;
+}
+function prettyDate(dateValue){
+    if( dateValue==9999){
+        return "Now";
+    }
+    else if( dateValue<0){
+        if( dateValue<-1.0e9){
+            return (-parseFloat(Math.round((dateValue/1.0e9) * 100) / 100).toFixed(2))+"G";
+        }
+        if( dateValue<-1.0e6){
+            return (-parseFloat(Math.round((dateValue/1.0e6) * 100) / 100).toFixed(2))+"M"
+        }
+        if( dateValue<-1.0e3){
+            return (-parseFloat(Math.round((dateValue/1.0e3) * 100) / 100).toFixed(2))+"k";
+        }
+        else return (-parseFloat(Math.round(dateValue * 100) / 100).toFixed(2))+"BCE";
+    }
+    else{
+        year=truncate(dateValue);
+        var monthValue=dateValue-year;
+        var monthNames=new Array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
+        var monthLengths=new Array(31,28,31,30,31,30,31,31,30,31,30,31);
+        var days=Math.floor(monthValue*365);
+        if(  isLeap(year)){
+            monthLengths[1]=29;
+            days=Math.floor(monthValue*366);
+        }
+        var acc=0, monthIdx=0;
+        for( monthIdx=0;monthIdx<12;monthIdx++){
+            if( days<=acc+monthLengths[monthIdx]) break;
+            acc+=monthLengths[monthIdx];
+        }
+//        return monthNames[monthIdx]+' '+ ((days-acc)?days-acc:1) + ' ' + (year); eliminate Jan 1
+        return year;
+    }
+}
+  function ScaledYear(dateValue){
+      if( dateValue==9999){
+          return 2014;
+      }
+      else if( dateValue<0){
+          if( dateValue<-1.0e9){
+              return (parseFloat(Math.round((dateValue/1.0e9) * 100) / 100).toFixed(2));
+          }
+          if( dateValue<-1.0e6){
+              return (parseFloat(Math.round((dateValue/1.0e4) * 100) / 100).toFixed(2));
+          }
+          if( dateValue<-1.0e3){
+              return (parseFloat(Math.round((dateValue) * 100) / 100).toFixed(2));
+          }
+          else return (parseFloat(Math.round(dateValue * 100) / 100).toFixed(2));
+      }
+      else{
+          return dateValue;
+      }
+  }
+  function getAllChildTimeLines(superCollection,subCollection,timeLine, timeLineIndex){
+      $.ajax(
+              {
+                  type: "GET",
+                  url: "http://test.chronozoom.com/api/gettimelines",
+//                  url: "http://chronozoom.com/api/gettimelines",
+                  data: {
+                      supercollection: superCollection,
+                      collection: subCollection,
+                      commonAncestor: timeLine,
+//                      depth: 5
+                      depth: 100
+                  },
+                  dataType: "json",
+                  success: function (data, textStatus, jqXHR) {
+                      if( null != data){
+                          var list=$("#"+timeLine).find(".child-timeline-list");
+                          if( null!=data){
+//                              if( null!=data.timelines){
+                              $(list).empty();
+//                              for( var i=0;i<data.timelines.length;i++){
+//                              for( var ix=0;ix<data.length;ix++){
+                                  timelineRaw=data;
+
+                                  DrawTimeline (data.start, data.end, data.title);
+//                                    DrawTimeline (data.start, data.end, timelineRaw.title);
+
+//                              list=$("#"+timeLine).find(".child-exhibit-list").first();
+                                  if( null!=data.exhibits && document.getElementById('events').checked){
+//                                      $(list).empty();
+                                      for( var i2=0;i2<data.exhibits.length;i2++){
+                                          DrawEvent(data.exhibits[i2].title, data.exhibits[i2].time, data.exhibits[i2].id);
+                                          list2=$("#"+data.exhibits[i2].id).find(".child-artifact-list");
+                                          if( null!=data.exhibits[i2].contentItems && document.getElementById('artifacts').checked){
+                                              for( var j=0;j<data.exhibits[i2].contentItems.length;j++){
+                                              DrawContentItem(data.exhibits[i2].contentItems[j].title, data.exhibits[i2].contentItems[j].mediaType, data.exhibits[i2].contentItems[j].description ,j,data.exhibits[i2].contentItems[j].id, data.exhibits[i2].time, data.exhibits[i2].contentItems[j].uri  );
+                                              }
+                                          }
+                                      }
+                                  }
+                              for( var i=0;i<data.timelines.length;i++){
+                                  getAllChildTimeLines(superCollection,subCollection,data.timelines[i].id, i);
+//                                  document.getElementById('timelineindex').value = i;
+
+//                                  }
+                              }
+
+                          }
+                          else $(list).text("No child timelines");
+
+/*                          list=$("#"+timeLine).find(".child-exhibit-list").first();
+                          if( null!=data.exhibits){
+                              $(list).empty();
+                              for( var i=0;i<data.exhibits.length;i++){
+//                                  var o5=$( "#exhibit-template" ).clone().appendTo( list);
+//                                  o5.attr("id",data.exhibits[i].id);
+
+
+//                                  DrawEvent(data.exhibits[i].title, data.exhibits[i].time);
+
+                                  list2=$("#"+data.exhibits[i].id).find(".child-artifact-list");
+                                  if( null!=data.exhibits[i].contentItems){
+                                      for( var j=0;j<data.exhibits[i].contentItems.length;j++){
+*//*                                          var o6=$( "#artifact-template" ).clone().appendTo( list2);
+                                          o6.attr("id",data.exhibits[i].contentItems[j].id);
+                                          $(o6).find(".artifact-title").text(data.exhibits[i].contentItems[j].title+" ("+data.exhibits[i].contentItems[j].mediaType+")");
+                                          $(o6).find("div.ad-text").text(data.exhibits[i].contentItems[j].description);
+                                          var uri=data.exhibits[i].contentItems[j].uri;
+                                          var o7=$(o6).find("img");
+                                          o7.attr("src",uri.replace("\\",""));*//*
+
+//                                          DrawContentItem(data.exhibits[i].contentItems[j].title, data.exhibits[i].contentItems[j].mediaType );
+                                      }
+                                  }
+                                  else $(list2).text("No child artifacts");
+                              }
+                          }
+                          else $(list).text("No child exhibits");*/
+                      }
+                  },
+                  error: function (XMLHttpRequest, textStatus, errorThrown) {
+                      alert("Ajax error: "+textStatus+", "+errorThrown);
+                  }
+              });
+  }
+
+function DrawEvent(Title, WhenOccurred, id){
+/*    var geometry1 = new THREE.CubeGeometry( 10, 10, 10 );
+    var material1 = new THREE.MeshNormalMaterial();
+
+
+        var mesh1 = new THREE.Mesh( geometry1, material1 );
+
+
+    mesh1.rotation.x = Math.random() * 2 * Math.PI;
+    mesh1.rotation.y = Math.random() * 2 * Math.PI;
+
+//                     parseFloat(Math.round((start/scaleFactor) * 100) / 100).toFixed(2)
+    mesh1.position.x = parseFloat(Math.round((WhenOccurred/scaleFactor) * 100) / 100).toFixed(2); //-300;
+    mesh1.position.y = CurrentTimelineY;// -100 + EventCount;
+    mesh1.position.z = CurrentTimelineZ;
+    mesh1.matrixAutoUpdate = false;
+    mesh1.updateMatrix();
+    scene.add( mesh1 );
+    targetList.push(mesh1);*/
+
+/*    spriteEvent = makeTextSprite( prettyDate(" " + WhenOccurred) + " " + Title + " ", { fontsize: 50, backgroundColor: {r:0, g:155, b:0, a:1}, borderColor: {r:0, g:0, b:0, a:1} } );
+
+    spriteEvent.x = parseFloat(Math.round((WhenOccurred/scaleFactor) * 100) / 100).toFixed(2);
+    spriteEvent.position.y = CurrentTimelineY;// -100 + EventCount;
+    spriteEvent.position.z = CurrentTimelineZ;
+    scene.add( spriteEvent );*/
+//    EventCount =+ 50;
+    var lineGeometry = new THREE.Geometry();
+    var lineMaterial;
+    var vertArray = lineGeometry.vertices;
+    var TopProp = 0;
+    var BotProp = 0;
+    var prop = 0;
+    var endOffset= 0;
+    var eventPlotPoint = 0;
+    var WhenOccurredScaledForLength = 0;
+    var eventZOffset = 100;
+//    lineMaterial = new THREE.LineBasicMaterial( { color: CurrentTimelineColor } );
+    lineMaterial = new THREE.LineDashedMaterial( { color: CurrentTimelineColor, dashSize: 3, gapSize: 3 });
+
+    TopProp = (WhenOccurred/scaleFactor) - CurrentTimelineX;
+    BotProp = CurrentTimeLineXEnd - CurrentTimelineX;
+    prop = TopProp/BotProp;
+    endOffset= CurrentTimeLineXEndScaled - CurrentTimelineX;
+    eventPlotPoint = prop * endOffset * -1;
+//    var ScaledEnd = CurrentTimeLineXEnd * lengthScale;
+    WhenOccurredScaledForLength = CurrentTimelineX - eventPlotPoint;
+    vertArray.push( new THREE.Vector3(WhenOccurredScaledForLength, CurrentTimelineY, CurrentTimelineZ), new THREE.Vector3(WhenOccurredScaledForLength, CurrentTimelineY, CurrentTimelineZ - eventZOffset) );
+
+//    vertArray.push( new THREE.Vector3(parseFloat(Math.round((WhenOccurred/scaleFactor) * 100 * lengthScale) / 100).toFixed(2), CurrentTimelineY, CurrentTimelineZ), new THREE.Vector3(parseFloat(Math.round((WhenOccurred/scaleFactor) * 100 * lengthScale) / 100).toFixed(2), CurrentTimelineY, CurrentTimelineZ - 100) );
+    lineGeometry.computeLineDistances();
+    var line = new THREE.Line( lineGeometry, lineMaterial );
+    scene.add(line);
+//    var spriteEvent = makeTextSprite( prettyDate(" " + WhenOccurred) + " " + Title + " ", { fontsize: 32, backgroundColor: {r:0, g:200, b:250, a:1},foregroundColor: {r:0, g:0, b:0, a:1}, borderColor: {r:0, g:0, b:0, a:1} } );
+    var spriteEvent = makeTextSprite( prettyDate(" " + WhenOccurred) + " " + Title + " ", { fontsize: 32, backgroundColor: {r:204, g:255, b:255, a:1},foregroundColor: {r:0, g:0, b:0, a:1}, borderColor: {r:0, g:0, b:0, a:1} } );
+    spriteEvent.position = lineGeometry.vertices[1].clone().multiplyScalar(1);
+    eventPosition = spriteEvent.position;
+    eventX = spriteEvent.position.x;
+    eventY = spriteEvent.position.y;
+    eventZ = spriteEvent.position.z;
+    scene.add( spriteEvent );
+//    targetList.push(spriteEvent);
+    EventCount += 1;
+    document.getElementById('eventCount').value = EventCount;
+    getTripleBySubject('czexhibit', id, WhenOccurredScaledForLength, CurrentTimelineY, CurrentTimelineZ);
+
+//    var floorTexture = new THREE.ImageUtils.loadTexture( 'assets/images/checkerboard.jpg' );
+//    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
+//    floorTexture.repeat.set( 10, 10 );
+/*    var material1 = new THREE.MeshNormalMaterial() ;
+ addPainting( scene, mesh, eventX, eventY, eventZ  + artifactCountGlobal*12 );
+    material1.color = 0x99CCFF;
+//    var material1 = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+//    var geometry1 = new THREE.PlaneGeometry( 20, 20, 1, 1);
+    var geometry1 = new THREE.CircleGeometry( 5, 20);
+*//*    for ( var i = 0; i < geometry1.faces.length; i++ )
+    {
+        face = geometry1.faces[ i ];
+        face.color.setRGB( 204, 255, 255 );
+//        face.color.setRGB( 0, 0, 0.8 * Math.random() + 0.2 );
+    }*//*
+//    geometry1.colorsNeedUpdate = true;
+    var mesh1 = new THREE.Mesh( geometry1, material1 );
+    mesh1.position.x = WhenOccurredScaledForLength - 1;
+    mesh1.position.y = CurrentTimelineY;// -100 + EventCount;
+    mesh1.position.z = CurrentTimelineZ - eventZOffset;
+    mesh1.rotation.y = Math.PI / 2;
+    mesh1.name = Title;
+    mesh1.matrixAutoUpdate = false;
+    mesh1.color = 0x99CCFF;
+    mesh1.updateMatrix();
+    scene.add( mesh1 );
+    targetList.push(mesh1);*/
+ }
+function DrawContentItem(Title, MediaType, Description, artifactCount, id, eventTime, uri){
+    var spriteArtifact = makeTextSprite( " " + Title + " ", { fontsize: 32, backgroundColor: {r:255, g:255, b:204, a:1},foregroundColor: {r:0, g:0, b:0, a:1}, borderColor: {r:0, g:0, b:0, a:1} } );
+/*    spriteArtifact.position.x = eventX;
+    spriteArtifact.position.y = eventY - artifactCount*14 -20;
+    spriteArtifact.position.z = eventZ-40;*/
+//    scene.add( spriteArtifact );
+    spriteArtifact.position.x = eventX;
+    spriteArtifact.position.y = eventY  -20;
+    spriteArtifact.position.z = eventZ + artifactCount*12;
+    artifactCountGlobal = artifactCount;
+/*    try {
+//    texturePainting = THREE.ImageUtils.loadTexture( uri, THREE.UVMapping, callbackPainting );
+      texturePainting = THREE.ImageUtils.loadTexture( 'https://lh4.googleusercontent.com/-Bp_ZAYDvB0s/Usxk6x34WyI/AAAAAAAAABY/3Q8fzALN2a4/s800/Screenshot%2520%25282%2529.jpg', THREE.UVMapping, callbackPainting );
+
+    materialPaintingGlobal = new THREE.MeshBasicMaterial( { color: 0xffffff, map: texturePainting } );
+    }
+    catch (err){
+        var x = 1;
+    }*/
+    var material1 = new THREE.MeshNormalMaterial() ;
+    material1.side = THREE.DoubleSide;
+//    var material1 = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+    var geometry1 = new THREE.CircleGeometry( 5, 20);
+/*    for ( var i = 0; i < geometry1.faces.length; i++ )
+    {
+        face = geometry1.faces[ i ];
+        face.color.setRGB( 0, 0, 0 );
+    }*/
+    var mesh1 = new THREE.Mesh( geometry1, material1 );
+    mesh1.position.x = spriteArtifact.position.x - 1;
+    mesh1.position.y = spriteArtifact.position.y;
+    mesh1.position.z = spriteArtifact.position.z;
+    mesh1.rotation.y = Math.PI / 2;
+//    mesh1.name = prettyDate(eventTime) + " '" + Title + "' - " + uri + " " + Description;
+    mesh1.name = prettyDate(eventTime) + " '" + Title + "' - " + Description;
+//    mesh1.name = prettyDate(eventTime) + " '" + Title + "' - " + Description;
+    mesh1.uri = uri;
+    mesh1.color = 0xFF9900;
+    mesh1.matrixAutoUpdate = false;
+    mesh1.updateMatrix();
+    scene.add( mesh1 );
+    targetList.push(mesh1);
+    getTripleBySubject('czartifact', id, mesh1.position.x, mesh1.position.y, mesh1.position.z);
+
+/*    var lineGeometry = new THREE.Geometry();
+    var lineMaterial;
+    lineMaterial = new THREE.LineDashedMaterial( { color: CurrentTimelineColor, dashSize: 3, gapSize: 3 });
+    var vertArray = lineGeometry.vertices;
+    vertArray.push( eventX, eventY + artifactCount*10, eventZ), new THREE.Vector3(eventX, eventY + artifactCount*10, eventZ + 10);
+    var line = new THREE.Line( lineGeometry, lineMaterial );
+    scene.add(line);*/
+
+/*    var geometry = new THREE.SphereGeometry( 10, 10, 10 );
+    var material = new THREE.MeshNormalMaterial();
+
+
+    var mesh = new THREE.Mesh( geometry, material );
+
+
+//    mesh.rotation.x = Math.random() * 2 * Math.PI;
+//    mesh.rotation.y = Math.random() * 2 * Math.PI;
+
+    mesh.matrixAutoUpdate = false;
+    mesh.updateMatrix();
+    scene.add( mesh );
+    mesh.position.x = eventX;
+    mesh.position.y = eventY + artifactCount*10;
+    mesh.position.z = eventZ;*/
+
+    ContentItemCount += 1;
+
+    document.getElementById('artifactCount').value = ContentItemCount;
+  }
+
+  function getTimelines(superCollection,subCollection,timeLine){
+	$.ajax(
+	{
+		type: "GET",
+		url: "http://test.chronozoom.com/api/gettimelines",
+		data: {
+			supercollection: superCollection,
+			collection: subCollection,
+            commonAncestor: timeLine,
+			depth: 5
+		},
+		dataType: "json",
+		success: function (data, textStatus, jqXHR) {
+            if( null != data){
+                var list=$("#"+timeLine).find(".child-timeline-list");
+                if( null!=data.timelines){
+                    $(list).empty();
+                    for( var i=0;i<data.timelines.length;i++){
+                        var o4=$( "#timeline-template" ).clone().appendTo( list);
+                        o4.attr("id",data.timelines[i].id);
+                        $(o4).find(".timeline-title").text(data.timelines[i].title);
+                        $(o4).find(".timeline-from-time").text(prettyDate(data.timelines[i].start));
+                        $(o4).find(".timeline-to-time").text(prettyDate(data.timelines[i].end));
+                        DrawTimeline (data.timelines[i].start, data.timelines[i].end, data.timelines[i].title);
+                    }
+                }
+                else $(list).text("No child timelines");
+
+                list=$("#"+timeLine).find(".child-exhibit-list").first();
+                if( null!=data.exhibits){
+                    $(list).empty();
+                    for( var i=0;i<data.exhibits.length;i++){
+                        var o5=$( "#exhibit-template" ).clone().appendTo( list);
+                        o5.attr("id",data.exhibits[i].id);
+                        $(o5).find(".exhibit-title").text(data.exhibits[i].title);
+                        $(o5).find(".exhibit-time").text(prettyDate(data.exhibits[i].time));
+
+                        list2=$("#"+data.exhibits[i].id).find(".child-artifact-list");
+                        if( null!=data.exhibits[i].contentItems){
+                            for( var j=0;j<data.exhibits[i].contentItems.length;j++){
+                                var o6=$( "#artifact-template" ).clone().appendTo( list2);
+                                o6.attr("id",data.exhibits[i].contentItems[j].id);
+                                $(o6).find(".artifact-title").text(data.exhibits[i].contentItems[j].title+" ("+data.exhibits[i].contentItems[j].mediaType+")");
+                                $(o6).find("div.ad-text").text(data.exhibits[i].contentItems[j].description);
+                                var uri=data.exhibits[i].contentItems[j].uri;
+                                var o7=$(o6).find("img");
+                                o7.attr("src",uri.replace("\\",""));                                
+                            }
+                        }
+                        else $(list2).text("No child artifacts");
+                    }
+                }
+                else $(list).text("No child exhibits");
+            }
+		},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Ajax error: "+textStatus+", "+errorThrown);
+        }
+	});
+}
+/* Show or hide the Artifact descriptions */
+function flipDescription(elem){
+    if( "artifact-description-collapsed" == elem.parentNode.parentNode.className)
+        elem.parentNode.parentNode.className = "artifact-description-expanded";
+    else
+        elem.parentNode.parentNode.className = "artifact-description-collapsed";
+}
+function removeChildren(o){
+    var list=$("#"+o.parentNode.parentNode.parentNode.id).find(".child-timeline-list");
+    $(list).empty();
+    var list=$("#"+o.parentNode.parentNode.parentNode.id).find(".child-exhibit-list");
+    $(list).empty();
+}
+function getChildren(o){
+    getTimelines( globalSuperCollections, globalCollection, o.parentNode.parentNode.parentNode.id);
+}
+/* Get the top level timeline to obtain a parent timeline GUID */
+function getRootTimeline(superCollection,subCollection){
+    $( "#currentcollection-list").empty();
+	$.ajax(
+	{
+		type: "GET",
+		url: "http://test.chronozoom.com/api/gettimelines",
+		data: {
+			supercollection: superCollection,
+			collection: subCollection,
+			depth: 2
+		},
+		dataType: "json",
+		success: function (data, textStatus, jqXHR) {
+            if( null != data){
+                var o3=$( "#timeline-template" ).clone().appendTo( "#currentcollection-list");
+                o3.attr("id",data.id);
+                $(o3).find(".timeline-title").text(data.title);
+                $(o3).find(".timeline-from-time").text(prettyDate(data.start));
+                $(o3).find(".timeline-to-time").text(prettyDate(data.end));
+                rootTimelineId = data.id;
+                superCollectionGlobal = superCollection;
+                subCollectionGlobal = subCollection;
+//                DrawTimeline (data.start, data.end, data.title);
+//                getAllChildTimeLines(superCollection,subCollection,data.id);
+/*                if (document.getElementById('axes').checked){
+                    var axes = new THREE.AxisHelper(4000);
+                    axes.position.set(0,0,0);
+                    scene.add(axes);
+                }*/
+                if (document.getElementById('ww1').checked){
+/*                    camera.position.x = 15.11;
+                     camera.position.y = 453;
+                     camera.position.z = 2500;*/
+                    camera.position.x = 2074;
+                    camera.position.y = 62.7;
+                    camera.position.z = 1466;
+//                    camera.lookAt(500, 25, 0);
+                    getAllChildTimeLines('chronozoomer','chronozoomer','fefea7de-89d2-426e-91ba-b4d87c9bda4c');
+                    document.getElementById('veryRecent').value = true;
+                } else {
+                    getAllChildTimeLines(superCollection,subCollection,rootTimelineId);
+                }
+
+            }
+		},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Ajax error: "+textStatus+", "+errorThrown);
+        }
+	});
+}
+function DrawTimeline (start, end, timeLineTitle){
+    var lineGeometry = new THREE.Geometry();
+    var lineMaterial;
+    var vertArray = lineGeometry.vertices;
+
+    var lineGeometry1 = new THREE.Geometry();
+    var vertArray1 = lineGeometry1.vertices;
+
+    var lineGeometry2 = new THREE.Geometry();
+    var vertArray2 = lineGeometry.vertices;
+
+    if (start <= -1.0e9){
+        if (document.getElementById('giga').checked){
+            CurrentTimelineColor = 0xFFCC00;
+            lineMaterial = new THREE.LineBasicMaterial( { color: CurrentTimelineColor, lineWidth: 20 } ); // orange
+            scaleFactor = 1.0e7;
+            zOffset = 0 * scaleSpace + zStart;
+            GigaCount += yStep;
+            TimeLineY = GigaCount;
+            lengthScale = 1;
+        }
+        else
+            return;
+    }
+    else if (start <= -1.0e6){
+        if (document.getElementById('mega').checked){
+            CurrentTimelineColor = 0x9900CC;
+            lineMaterial = new THREE.LineBasicMaterial( { color: CurrentTimelineColor, lineWidth: 20 } ); // purple
+            scaleFactor = 1.0e6;
+            zOffset = 1 * scaleSpace + zStart;
+            MegaCount += yStep;
+            TimeLineY = MegaCount;
+            lengthScale = 1;
+        }
+        else
+            return;
+    }
+    else if (start <= -1.0e3){
+        if (document.getElementById('kilo').checked){
+            CurrentTimelineColor = 0x009900;
+            lineMaterial = new THREE.LineBasicMaterial( { color: CurrentTimelineColor, lineWidth: 20 } ); // green
+    //        lineMaterial = new THREE.LineBasicMaterial( { color: {r:0, g:155, b:0, a:1}, lineWidth: 20 } ); // green
+            scaleFactor = 1.0e3;
+            zOffset = 2 * scaleSpace + zStart;
+            ThouCount += yStep;
+            TimeLineY = ThouCount;
+            lengthScale = 1;
+        }
+        else
+            return;
+    }
+    else if (start <= 0){
+        if (document.getElementById('bce').checked){
+            CurrentTimelineColor = 0x0000FF;
+            lineMaterial = new THREE.LineBasicMaterial( { color: CurrentTimelineColor, lineWidth: 20 } ); // blue
+            scaleFactor = 1;
+            zOffset = 3 * scaleSpace + zStart;
+            BCECount += yStep;
+            TimeLineY = BCECount;
+            lengthScale = 1;
+        }
+        else
+            return;
+    }
+    else  if (start <= 1300){
+        if (document.getElementById('ce').checked){
+            CurrentTimelineColor = 0xcc0000;
+            lineMaterial = new THREE.LineBasicMaterial( { color: CurrentTimelineColor } ); // black
+    //        lineMaterial = new THREE.LineDashedMaterial( { color: 0xffffff, dashSize: 1, gapSize: 0.5 });
+            scaleFactor = 1;
+            zOffset = 4 * scaleSpace + zStart;
+            CECount += yStep;
+            TimeLineY = CECount;
+            lengthScale = 1;
+        }
+        else
+            return;
+    } else if (start <= 1850){
+        if (document.getElementById('recent').checked){
+            CurrentTimelineColor = 0x000000;
+            lineMaterial = new THREE.LineBasicMaterial( { color: CurrentTimelineColor } ); // black
+
+            scaleFactor = 2;
+            zOffset = 5 * scaleSpace + zStart;
+            RecentCount += yStep;
+            TimeLineY = RecentCount;
+            lengthScale = 2;
+        }
+        else
+            return;
+    } else {
+        if (document.getElementById('veryRecent').checked || document.getElementById('ww1').checked){
+            CurrentTimelineColor = 0x000000;
+            lineMaterial = new THREE.LineBasicMaterial( { color: CurrentTimelineColor } ); // red
+
+            scaleFactor = 10;
+            zOffset = 6 * scaleSpace + zStart;
+            Count1850 += yStep;
+            TimeLineY = Count1850;
+            lengthScale = 10;
+        }
+        else
+            return;
+    }
+
+
+    if (end == 9999) end = 2014;
+    CurrentTimelineX = parseFloat(Math.round((start/scaleFactor) * 100) / 100).toFixed(2);
+    CurrentTimeLineXEnd = parseFloat(Math.round((end/scaleFactor) * 100) / 100).toFixed(2);
+    CurrentTimeLineXEndScaled = parseFloat(Math.round((end/scaleFactor) * 100 * lengthScale) / 100).toFixed(2);
+    if (switch2Dor3D = "3D")
+        CurrentTimelineY = -TimeLineY;
+    else
+        CurrentTimelineY = 0;
+    CurrentTimelineZ = zOffset;
+//    vertArray.push( new THREE.Vector3(ScaledYear(start), 200-TimeLineCount, zOffset), new THREE.Vector3(ScaledYear(end), 200-TimeLineCount, zOffset) );
+//    vertArray.push( new THREE.Vector3(parseFloat(Math.round((start/scaleFactor) * 100) / 100).toFixed(2), 200-TimeLineY, zOffset), new THREE.Vector3(parseFloat(Math.round((end/scaleFactor) * 100) / 100).toFixed(2), 200-TimeLineY, zOffset) );
+    vertArray.push( new THREE.Vector3(CurrentTimelineX, CurrentTimelineY, CurrentTimelineZ), new THREE.Vector3(parseFloat(Math.round((end/scaleFactor) * 100 * lengthScale) / 100).toFixed(2), CurrentTimelineY, CurrentTimelineZ) );
+
+    lineGeometry.computeLineDistances();
+    var line = new THREE.Line( lineGeometry, lineMaterial );
+    scene.add(line);
+//    targetList.push(line);
+    vertArray1.push( new THREE.Vector3(CurrentTimelineX, CurrentTimelineY, CurrentTimelineZ), new THREE.Vector3(CurrentTimelineX, CurrentTimelineY + yStep, CurrentTimelineZ) );
+//    lineMaterial = new THREE.LineDashedMaterial( { color: 0xffffff, dashSize: 1, gapSize: 0.5 });
+    lineGeometry1.computeLineDistances();
+    var line1 = new THREE.Line( lineGeometry1, lineMaterial );
+    scene.add(line1);
+
+    vertArray2.push( new THREE.Vector3(parseFloat(Math.round((end/scaleFactor) * 100) / 100).toFixed(2), CurrentTimelineY, CurrentTimelineZ), new THREE.Vector3(parseFloat(Math.round((end/scaleFactor) * 100) / 100).toFixed(2), CurrentTimelineY + yStep, CurrentTimelineZ) );
+//    lineMaterial = new THREE.LineDashedMaterial( { color: 0xffffff, dashSize: 1, gapSize: 0.5 });
+    lineGeometry2.computeLineDistances();
+    var line2 = new THREE.Line( lineGeometry2, lineMaterial );
+    scene.add(line2);
+
+    var spritey;
+    for (var i = 0; i < lineGeometry.vertices.length; i++)
+    {
+        if (i==0) {
+            spritey = makeTextSprite( prettyDate(" " + start) + " " + timeLineTitle + " ", { fontsize: 32, backgroundColor: {r:255, g:255, b:255, a:1}, borderColor: {r:0, g:155, b:0, a:1} } );
+            // Create an indent tree on the left side of the lines
+            spritey.position = lineGeometry.vertices[i].clone().multiplyScalar(1) + 50;
+        }
+
+        else{
+            spritey = makeTextSprite(  prettyDate(" " + end) + " " + timeLineTitle + " ", { fontsize: 32, backgroundColor: {r:255, g:255, b:255, a:1}, borderColor: {r:0, g:0, b:200, a:1} } );
+            spritey.position = lineGeometry.vertices[i].clone().multiplyScalar(1);
+        }
+
+        scene.add( spritey );
+        targetList.push(spritey);
+/*        var spriteTitle = makeTextSprite(timeLineTitle, { fontsize: 32, backgroundColor: {r:255, g:255, b:255, a:1} } );
+        spriteTitle.position = lineGeometry.vertices[i].clone().multiplyScalar(1.1);
+        scene.add( spriteTitle )*/
+    }
+
+    TimeLineCount += 1;
+//    PingarData = getTermsFromPingar("ddddd");
+//    PingarData = " ";
+/*    var dataToCategorize = "Yvo de Boer said he left his job as the U.N.'s top climate official in frustration 18 months ago, believing the process of negotiating a meaningful climate agreement is failing.";
+    getTermsFromPingar(dataToCategorize, function(ex,tags){
+        if (ex){
+            showModalDialog("Pingar error");
+            return;
+        }
+        PingarData = tags;
+    });*/
+
+    document.getElementById('timelineCount').value = TimeLineCount;
+}
+
+function drawText1 (message, messageX, messageY, messageZ){
+    var     height = 20,
+            size = 70,
+            hover = 30,
+            curveSegments = 4,
+            bevelThickness = 2,
+            bevelSize = 1.5,
+            bevelSegments = 3,
+            bevelEnabled = true,
+            font = "optimer", // helvetiker, optimer, gentilis, droid sans, droid serif
+            weight = "bold", // normal bold
+            style = "normal"; // normal italic
+    var textGeo = new THREE.TextGeometry( message, {
+        size: size,
+        height: height,
+        curveSegments: curveSegments,
+
+        font: font,
+        weight: weight,
+        style: style,
+
+        bevelThickness: bevelThickness,
+        bevelSize: bevelSize,
+        bevelEnabled: bevelEnabled,
+
+        material: 0,
+        extrudeMaterial: 1
+
+    });
+
+    textGeo.computeBoundingBox();
+    textGeo.computeVertexNormals();
+
+    // "fix" side normals by removing z-component of normals for side faces
+    // (this doesn't work well for beveled geometry as then we lose nice curvature around z-axis)
+
+    if ( ! bevelEnabled ) {
+
+        var triangleAreaHeuristics = 0.1 * ( height * size );
+
+        for ( var i = 0; i < textGeo.faces.length; i ++ ) {
+
+            var face = textGeo.faces[ i ];
+
+            if ( face.materialIndex == 1 ) {
+
+                for ( var j = 0; j < face.vertexNormals.length; j ++ ) {
+
+                    face.vertexNormals[ j ].z = 0;
+                    face.vertexNormals[ j ].normalize();
+
+                }
+
+                var va = textGeo.vertices[ face.a ];
+                var vb = textGeo.vertices[ face.b ];
+                var vc = textGeo.vertices[ face.c ];
+
+                var s = THREE.GeometryUtils.triangleArea( va, vb, vc );
+
+                if ( s > triangleAreaHeuristics ) {
+
+                    for ( var j = 0; j < face.vertexNormals.length; j ++ ) {
+
+                        face.vertexNormals[ j ].copy( face.normal );
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+//    var centerOffset = -0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
+
+
+    var material;
+    var textMesh1 = new THREE.Mesh( textGeo, material );
+
+    textMesh1.position.x = messageX;
+    textMesh1.position.y = messageY;
+    textMesh1.position.z = messageZ;
+
+    textMesh1.rotation.x = 0;
+    textMesh1.rotation.y = - Math.PI * .5;
+    scene.add( textMesh1 );
+//    group.add( textMesh1 );
+
+/*    if ( mirror ) {
+
+        textMesh2 = new THREE.Mesh( textGeo, material );
+
+        textMesh2.position.x = centerOffset;
+        textMesh2.position.y = -hover;
+        textMesh2.position.z = height;
+
+        textMesh2.rotation.x = Math.PI;
+        textMesh2.rotation.y = Math.PI * 2;
+
+        group.add( textMesh2 );
+
+    }*/
+}
+
+
+  function GroupTest(){
+      // //// Group test
+     var geometry1 = new THREE.CubeGeometry( 10, 10, 10 );
+      var material1 = new THREE.MeshNormalMaterial();
+
+      group = new THREE.Object3D();
+
+ /*       for ( var i = 0; i < 1000; i ++ ) {
+
+          var mesh = new THREE.Mesh( geometry1, material1 );
+          mesh.position.x = Math.random() * 200 - 100;
+          mesh.position.y = Math.random() * 200 - 100;
+          mesh.position.z = Math.random() * 200 - 100;
+
+          mesh.rotation.x = Math.random() * 2 * Math.PI;
+          mesh.rotation.y = Math.random() * 2 * Math.PI;
+
+          mesh.matrixAutoUpdate = false;
+          mesh.updateMatrix();
+
+          group.add( mesh );
+
+      }
+
+      scene.add( group );*/
+      // //////////////////
+  }
+
+  function getSuperCollections (){
+	$.ajax(
+	{
+
+		type: "GET",
+		url: "http://test.chronozoom.com/api/supercollections",
+		dataType: "json",
+		success: function (data, textStatus, jqXHR) {
+            var lineGeometry = new THREE.Geometry();
+            var lineMaterial;
+            var vertArray = lineGeometry.vertices;
+            if( null != data){
+	    		for(var i=0;i<data.length;i++){
+		    		for(var j=0;j<data[i].Collections.length;j++){
+                        var o2=$( "#supercollection-template" ).clone().appendTo( "#supercollection-list");
+                         $(o2).children("span.supercollection-name").text(data[i].Title);
+                         $(o2).children("span.collection-name").text(data[i].Collections[j].Title);
+                         o2.attr("id",data[i].Collections[j].Id);
+				    }
+			    }
+                $('#supercollection-list').on('click', '.supercollection', function(e){
+                    var id=e.target.parentNode.getAttribute("id");
+                    var o3=$("#"+id);
+                    globalSuperCollections=o3.children("span.supercollection-name").text();
+                    globalCollection=o3.children("span.collection-name").text();
+                    $("#current-collection").text(globalSuperCollections+"/"+globalCollection);
+                    getRootTimeline( globalSuperCollections, globalCollection);
+                });
+            }
+		},
+		error: function (XMLHttpRequest, textStatus, errorThrown){
+            alert("Ajax error: "+textStatus+", "+errorThrown);
+        }
+	});
+}
+  function clearScene(){
+      var objectCount=0;
+      scene = new THREE.Scene();
+      scene.add(camera);
+      camera.position.set(-1500,73,400);
+      camera.lookAt(scene.position);
+      var light = new THREE.PointLight(0xffffff);
+      light.position.set(100,250,100);
+      scene.add(light);
+      TimeLineCount = 0, TimeLineY = 0;
+      EventCount=0;
+      ContentItemCount=0, GigaCount=0, MegaCount=0, ThouCount=0, BCECount=0, CECount= 0, RecentCount=0, Count1850=0;
+      CurrentTimelineX=0, CurrentTimelineY=0, CurrentTimelineZ= 0, CurrentTimelineColor;
+      scaleFactor=0, zOffset=0;
+      if (document.getElementById('veryRecent').checked){
+          DrawLabels();
+          getSuperCollections();
+          getRootTimeline();
+      } else {
+          getAllChildTimeLines('chronozoomer','chronozoomer','fefea7de-89d2-426e-91ba-b4d87c9bda4c');
+      }
+//      getRootTimeline();
+//      getAllChildTimeLines(superCollectionGlobal, subCollectionGlobal, rootTimelineId);
+/*      scene.traverse(function(e) {
+          if (e  instanceof THREE.PerspectiveCamera || e  instanceof THREE.Light) {
+          }
+          else {
+          scene.remove(e);
+          objectCount -= 1;
+          }
+      });
+      document.getElementById('objectCount').value = objectCount;
+      render();*/
+  }
+
+  function draw2D(){
+       var check = document.getElementById('dimension').checked;
+      if (document.getElementById('dimension').checked){
+//          if (switch2Dor3D = "3D"){
+//              switch2Dor3D = "2D";
+              var objectCount=0;
+              scene.traverse(function(e) {
+//          if (e instanceof THREE.Line) {
+                  e.position.y  = 0;
+//              e.translateY = 1000;
+                  objectCount += 1;
+//          }
+              });
+            }
+          else {
+            switch2Dor3D = "3D";
+            clearScene()
+//            }
+      }
+
+      document.getElementById('objectCount').value = objectCount;
+/*      removeEntity();
+      render()*/
+//      var dimension = parseInt(document.getElementById('dimension').value);
+  }
+
+/*  function removeEntity() {
+      var scene = document.querySelectorAll("scene");                               //clear the objects from the scene
+      for (var i = 0; i < scene.length; i++) {                                    //loop through to get all object in the scene
+          var scene =document.getElementById("scene");
+          scene.removeChild(scene.childNodes[0]);                                        //remove all specified objects
+      }
+  }*/
+      function setView(){
+      if (document.getElementById('view').value == "Start"){
+          camera.position.set(-1000,700,500);
+      }
+      else if  (document.getElementById('view').value == "Top"){
+          camera.position.set(0,1700,0);
+      }
+      else if(document.getElementById('view').value == "Bottom"){
+          camera.position.set(0,-1700,0);
+      }
+      else if (document.getElementById('view').value == "Left"){
+          camera.position.set(-1700,0,0);
+      }
+      else if(document.getElementById('view').value == "Right"){
+          camera.position.set(1700,0,0);
+      }
+      else if (document.getElementById('view').value == "Back"){
+          camera.position.set(0,0,-1700);
+      }
+      else if (document.getElementById('view').value == "Front"){
+          camera.position.set(0,0,1700);
+      }
+  }
+  function DrawLabels(){
+      /*  drawText1("Giga", 100, 100, 0);
+       drawText1("Mega", 100, 100, scaleSpace);
+       drawText1("Kilo", 100, 100, scaleSpace*2);
+       drawText1("Thou", 100, 100, scaleSpace*3);
+       drawText1("BCE", 100, 100, scaleSpace*4);
+       drawText1("CE", 100, 100, scaleSpace*5);*/
+
+      spritey = makeTextSprite( "Giga", { fontsize: 100, backgroundColor: {r:255, g:255, b:255, a:1}, borderColor: {r:0, g:0, b:200, a:1} } );
+      spritey.position.x = 10;
+      spritey.position.y = 35;
+      spritey.position.z = 0 + zStart;
+      scene.add( spritey );
+      spritey = makeTextSprite( "Mega", { fontsize: 100, backgroundColor: {r:255, g:255, b:255, a:1}, borderColor: {r:0, g:0, b:200, a:1} } );
+      spritey.position.x = 10;
+      spritey.position.y = 35;
+      spritey.position.z = scaleSpace + zStart;
+      scene.add( spritey );
+      spritey = makeTextSprite( "Kilo", { fontsize: 100, backgroundColor: {r:255, g:255, b:255, a:1}, borderColor: {r:0, g:0, b:200, a:1} } );
+      spritey.position.x = 10;
+      spritey.position.y = 35;
+      spritey.position.z = scaleSpace*2 + zStart;
+      scene.add( spritey );
+      /*  spritey = makeTextSprite( "Thou", { fontsize: 100, backgroundColor: {r:255, g:255, b:255, a:1}, borderColor: {r:0, g:0, b:200, a:1} } );
+       spritey.position.x = 10;
+       spritey.position.y = 30;
+       spritey.position.z = scaleSpace*3;
+       scene.add( spritey );*/
+      spritey = makeTextSprite( "BCE", { fontsize: 100, backgroundColor: {r:255, g:255, b:255, a:1}, borderColor: {r:0, g:0, b:200, a:1} } );
+      spritey.position.x = 10;
+      spritey.position.y = 35;
+      spritey.position.z = scaleSpace*3 + zStart;
+      scene.add( spritey );
+      spritey = makeTextSprite( "CE", { fontsize: 100, backgroundColor: {r:255, g:255, b:255, a:1}, borderColor: {r:0, g:0, b:200, a:1} } );
+      spritey.position.x = 10;
+      spritey.position.y = 35;
+      spritey.position.z = scaleSpace*4 + zStart;
+      scene.add( spritey );
+      spritey = makeTextSprite( "<= 1850", { fontsize: 100, backgroundColor: {r:255, g:255, b:255, a:1}, borderColor: {r:0, g:0, b:200, a:1} } );
+      spritey.position.x = 10;
+      spritey.position.y = 35;
+      spritey.position.z = scaleSpace*5 + zStart;
+      scene.add( spritey );
+      spritey = makeTextSprite( "> 1850", { fontsize: 100, backgroundColor: {r:255, g:255, b:255, a:1}, borderColor: {r:0, g:0, b:200, a:1} } );
+      spritey.position.x = 10;
+      spritey.position.y = 35;
+      spritey.position.z = scaleSpace*6 + zStart;
+      scene.add( spritey );
+  }
+  function startup (){
+//      if (document.getElementById('ww1').checked){
+//          getAllChildTimeLines('chronozoomer','chronozoomer','fefea7de-89d2-426e-91ba-b4d87c9bda4c');
+//      } else {
+          resetCounters();
+          DrawLabels();
+          getSuperCollections();
+          getRootTimeline();
+//      }
+  }
+
+  /* Retrieve all Triple's that are attached to a particular Exhibit or Artifact
+   The 'subject' is a GUID prefixed by 'czexhibit:' or 'czartifact:' */
+  function getTripleBySubject(prefix,subject, WhenOccurredScaledForLength, CurrentTimelineY, CurrentTimelineZ){
+      $.ajax(
+              {
+                  /*        async: false, */
+                  type: "GET",
+                  url: "http://test.chronozoom.com/api/triples",
+                  data: {
+                      subject: prefix+':'+subject
+                      /*			predicate: predicate, */
+                      /*            object: object */
+                  },
+                  dataType: "json",
+                  success: function (data, textStatus, jqXHR) {
+                      if( null != data){
+                          for(var i=0;i<data.length;i++){
+                              for( var j=0;j<data[i].Objects.length;j++){
+                                  var tpredicate=data[i].Predicate.toLowerCase();
+                                  var tobject=data[i].Objects[j].Object.toLowerCase();
+                                  var relationDashSize = 0, relationGapSize = 0, relationColor;
+//                                  var aspot="#" + prefix + "-" +subject + " > .relations-list";
+//                                  var o2=$( "#relationship-template" ).clone().appendTo( aspot);
+//                                  o2.removeAttr("id");
+
+                                  if( 'czpred:strongcausality'==data[i].Predicate){
+                                      relationDashSize =3;
+                                      relationGapSize =1;
+                                      relationColor = 0xcc0000;
+                                  }
+                                  else if ( 'czpred:weakcausality'==data[i].Predicate){
+                                      relationDashSize =1;
+                                      relationGapSize =2;
+                                      relationColor = 0x0000FF;
+                                  } else {
+                                      relationDashSize =6;
+                                      relationGapSize =1;
+                                      relationColor = 0x000000;
+                                  }
+
+
+                                  var target=data[i].Objects[j].Object.replace(":","-").toLowerCase();
+                                  var pastPrefix = tobject.indexOf(":");
+                                  var oid=null;
+                                  var lineGeometry = new THREE.Geometry();
+                                  var lineMaterial;
+                                  var vertArray = lineGeometry.vertices;
+                                  if( -1!=pastPrefix) oid=tobject.substring(pastPrefix+1);
+                                  var TopProp = 0;
+                                  var BotProp = 0;
+                                  var prop = 0;
+                                  var endOffset= 0;
+                                  var eventPlotPoint = 0;
+                                  var time =0;
+                                  var timeScaledForLength=0;
+                                  var arrowGeometry = new THREE.Geometry();
+                                  var arrowvertArray  = arrowGeometry.vertices;
+                                  var arrowMaterial;
+                                  time=titlePeek( oid);
+                                  TopProp = (time/scaleFactor) - CurrentTimelineX;
+                                  BotProp = CurrentTimeLineXEnd - CurrentTimelineX;
+                                  prop = TopProp/BotProp;
+                                  endOffset= CurrentTimeLineXEndScaled - CurrentTimelineX;
+                                  eventPlotPoint = prop * endOffset * -1;
+//    var ScaledEnd = CurrentTimeLineXEnd * lengthScale;
+                                  timeScaledForLength = CurrentTimelineX - eventPlotPoint;
+                                  if( null!=time){
+                                      vertArray.push( new THREE.Vector3(WhenOccurredScaledForLength, CurrentTimelineY, CurrentTimelineZ - relationshipStep), new THREE.Vector3(timeScaledForLength, CurrentTimelineY, CurrentTimelineZ - relationshipStep) );
+                                      lineGeometry.computeLineDistances();
+                                      lineMaterial = new THREE.LineDashedMaterial( { color: relationColor, dashSize: relationDashSize, gapSize: relationGapSize });
+                                      var line = new THREE.Line( lineGeometry, lineMaterial );
+                                      scene.add(line);
+                                      // Arrow head
+                                      arrowvertArray.push( new THREE.Vector3(timeScaledForLength, CurrentTimelineY, CurrentTimelineZ - relationshipStep), new THREE.Vector3(timeScaledForLength - 10, CurrentTimelineY - 5, CurrentTimelineZ - relationshipStep) );
+                                      arrowGeometry.computeLineDistances();
+                                      arrowMaterial = new THREE.LineBasicMaterial( { color: relationColor });
+                                      var Arrow1 = new THREE.Line( arrowGeometry, arrowMaterial );
+//                                      Arrow1.rotation.x = Math.PI / 6;
+                                      scene.add(Arrow1);
+                                      arrowvertArray.push( new THREE.Vector3(timeScaledForLength, CurrentTimelineY, CurrentTimelineZ - relationshipStep), new THREE.Vector3(timeScaledForLength - 10, CurrentTimelineY + 5, CurrentTimelineZ - relationshipStep) );
+                                      arrowGeometry.computeLineDistances();
+                                      arrowMaterial = new THREE.LineBasicMaterial( { color: relationColor });
+                                      var Arrow2 = new THREE.Line( arrowGeometry, arrowMaterial );
+//                                      Arrow1.rotation.x = Math.PI / 6;
+                                      scene.add(Arrow2);
+                                      arrowvertArray.push( new THREE.Vector3(timeScaledForLength - 10, CurrentTimelineY - 5, CurrentTimelineZ - relationshipStep), new THREE.Vector3(timeScaledForLength - 10, CurrentTimelineY + 5, CurrentTimelineZ - relationshipStep) );
+                                      arrowGeometry.computeLineDistances();
+                                      arrowMaterial = new THREE.LineBasicMaterial( { color: relationColor });
+                                      var Arrow3 = new THREE.Line( arrowGeometry, arrowMaterial );
+//                                      Arrow1.rotation.x = Math.PI / 6;
+                                      scene.add(Arrow3);
+                                      relationshipStep += 10;
+                                  }
+//                                      $(o2).find("span.relation-target-text").text(otitle);
+                                  else{
+
+                                  }
+//                                      $(o2).find("span.relation-target-text").text(target);
+//                                  $(o2).find("span.relation-target a").attr("href","#"+target);
+                              }
+                          }
+                      }
+                  },
+                  error: function (XMLHttpRequest, textStatus, errorThrown) {
+                      alert("Ajax error: "+textStatus+", "+errorThrown);
+                  }
+              });
+  }
+  /* Brute force look ahead for title of referenced Exhibit or Artifact */
+  function titlePeek( oid){
+      if( null!=timelineRaw && null!=oid){
+          if( null!=timelineRaw.exhibits){
+              for(var i=0;i<timelineRaw.exhibits.length;i++){
+                  if( oid==timelineRaw.exhibits[i].id)
+                      return timelineRaw.exhibits[i].time;
+                  if( null!=timelineRaw.exhibits[i].contentItems){
+                      for(var j=0;j<timelineRaw.exhibits[i].contentItems.length;j++){
+                          if( oid==timelineRaw.exhibits[i].contentItems[j].id)
+                              return timelineRaw.exhibits[i].contentItems[j].time;
+                      }
+                  }
+                  else alert("No Artifacts!");
+              }
+          }
+          else alert("No Exhibits!");
+      }
+      else alert("No Timeline!");
+      return null;
+  }
+function clearObjectsFromScene(){
+  $.each(scene.__objects, function(idx, obj) {
+    scene.remove(obj);
+/*    for(var i=0;i<scene.objects.length;i++){
+      scene.remove(scene.objects(i));
+    }*/
+/*      if (obj.geometry) {
+          obj.geometry.dispose();
+      }
+      if (obj.material) {
+          if (obj.material instanceof THREE.MeshFaceMaterial) {
+              $.each(obj.material.materials, function(idx, obj) {
+                  obj.dispose();
+              });
+          } else {
+              obj.material.dispose();
+          }
+      }
+      if (obj.dispose) {
+          obj.dispose();
+      }*/
+      clearObjectsFromScene();
+  });
+  }
+
+  function resetCounters(){
+      EventCount=0;
+      ContentItemCount=0;
+      GigaCount=0;
+      MegaCount=0;
+      ThouCount=0;
+      BCECount=0;
+      CECount= 0;
+      RecentCount= 0;
+      Count1850=0;
+      CurrentTimelineX=0;
+      CurrentTimeLineXEnd= 0;
+      CurrentTimeLineXEndScaled = 0;
+      CurrentTimelineY=0;
+      CurrentTimelineZ= 0;
+      scaleFactor=0;
+      zOffset= 0;
+      zStart = -1000;
+      yStep = 20;
+      scaleSpace = 400;
+      eventPosition=0;
+      eventX=0;
+      eventY=0;
+      eventY=0;
+      TimeLineCount = 0;
+      TimeLineY = 0;
+      relationshipStep = 5;
+      camera.position.set(-1458,43,-1382);
+  }
+
+  function getTermsFromPingar(TextToAnalyse, pingarCallback){
+      // Initialize the object, before adding data to it.
+      var PingarAPIRequest = new Object();
+      var tags = "";
+      PingarData = "";
+      PingarAPIRequest.AppID = "9a8e2764";
+      PingarAPIRequest.AppKey = "908630a5a46eac5d6f67d87d7370dbad";
+      PingarAPIRequest.Language = "en";
+      PingarAPIRequest.EntityExtraction = new Object();
+      PingarAPIRequest.EntityExtraction.Documents = new Array();
+//      PingarAPIRequest.EntityExtraction.Documents[0]="Yvo de Boer said he left his job as the U.N.'s top climate official in frustration 18 months ago, believing the process of negotiating a meaningful climate agreement is failing.";
+      PingarAPIRequest.EntityExtraction.Documents[0]=TextToAnalyse;
+
+      PingarAPIRequest.EntityExtraction.DocumentsFormat = "Text";
+      $.ajax({
+          type: "POST",
+          contentType: "application/json; charset=utf-8",
+          url: "http://api3.pingar.com/json.svc/GetEntities",
+          data: JSON.stringify(PingarAPIRequest),
+          processData : false,
+          success: function (responseData) {
+              for(entityIndex in responseData.EntityExtraction.EntitiesResult[0])
+              {
+                  var entity = responseData.EntityExtraction.EntitiesResult[0][entityIndex];
+//                  $("#responseData").append(entity.Type  + " : " + entity.Title + "<br/>");
+//                  PingarData = PingarData + entity.Type  + " : " + entity.Title + " ";
+                  tags = tags + entity.Type  + " : " + entity.Title + " ";
+              }
+              pingarCallback(null, tags);
+          }
+      });
+//      return tags;
+
+  }
+
+  startup ();
+
+//]]>  
+
+</script>
+
+
+</body>
+
+
+</html>
+
